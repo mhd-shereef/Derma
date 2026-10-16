@@ -1,0 +1,656 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+}
+
+enum PatientGender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum VisitStatus {
+  IN_PROGRESS
+  COMPLETED
+  SIGNED
+  AMENDED
+}
+
+enum ProcedureCategory {
+  LASER
+  INJECTABLE
+  TOPICAL
+  SURGICAL
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMode {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  OTHER
+}
+
+enum PackageStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+model Tenant {
+  id                    String              @id @default(uuid())
+  name                  String              @db.VarChar(255)
+  slug                  String              @unique @db.VarChar(100)
+  gstin                 String?             @db.VarChar(15)
+  address               Json?
+  phone                 String?             @db.VarChar(20)
+  email                 String?             @db.VarChar(255)
+  logoUrl               String?             @db.Text
+  settings              Json                @default("{}")
+  subscriptionStatus    SubscriptionStatus  @default(TRIAL)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  deletedAt             DateTime?
+
+  users                 User[]
+  patients              Patient[]
+  appointments          Appointment[]
+  visits                Visit[]
+  photos                Photo[]
+  prescriptions         Prescription[]
+  procedureTemplates    ProcedureTemplate[]
+  procedureNotes        ProcedureNote[]
+  procedureCatalog      ProcedureCatalog[]
+  packages              Package[]
+  patientPackages       PatientPackage[]
+  invoices              Invoice[]
+  payments              Payment[]
+  regimens              Regimen[]
+  auditLogs             AuditLog[]
+
+  @@index([deletedAt])
+  @@map("tenant")
+}
+
+model User {
+  id                    String       @id @default(uuid())
+  tenantId              String
+  email                 String       @db.VarChar(255)
+  passwordHash          String       @db.VarChar(255)
+  firstName             String       @db.VarChar(100)
+  lastName              String       @db.VarChar(100)
+  role                  UserRole
+  phone                 String?      @db.VarChar(20)
+  licenseNumber         String?      @db.VarChar(50)
+  specialization        String?      @db.VarChar(100)
+  isActive              Boolean      @default(true)
+  mfaSecret             String?      @db.VarChar(255)
+  mfaEnabled            Boolean      @default(false)
+  failedLoginAttempts   Int          @default(0)
+  lockedUntil           DateTime?
+  lastLoginAt           DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  deletedAt             DateTime?
+
+  tenant                Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens         RefreshToken[]
+  createdPatients       Patient[]    @relation("PatientCreatedBy")
+  createdAppointments   Appointment[] @relation("AppointmentCreatedBy")
+  doctorAppointments    Appointment[] @relation("AppointmentDoctor")
+  doctorVisits          Visit[]      @relation("VisitDoctor")
+  signedVisits          Visit[]      @relation("VisitSignedBy")
+  procedureNotes        ProcedureNote[] @relation("ProcedureNotePerformedBy")
+  uploadedPhotos        Photo[]      @relation("PhotoUploadedBy")
+  prescriptions         Prescription[] @relation("PrescriptionDoctor")
+  createdRegimens       Regimen[]    @relation("RegimenCreatedBy")
+  createdPackages       PatientPackage[] @relation("PatientPackageCreatedBy")
+  createdInvoices       Invoice[]    @relation("InvoiceCreatedBy")
+  receivedPayments      Payment[]    @relation("PaymentReceivedBy")
+  auditLogs             AuditLog[]
+  photoAccessLogs       PhotoAccessLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([deletedAt])
+  @@map("user")
+}
+
+model RefreshToken {
+  id            String   @id @default(uuid())
+  userId        String
+  tokenHash     String   @db.VarChar(255)
+  deviceInfo    Json?
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_token")
+}
+
+model AuditLog {
+  id            BigInt   @id @default(autoincrement())
+  tenantId      String
+  userId        String?
+  action        AuditAction
+  entityType    String   @db.VarChar(100)
+  entityId      String?
+  oldValue      Json?
+  newValue      Json?
+  ipAddress     String?  @db.Inet
+  userAgent     String?  @db.Text
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, entityType, entityId, createdAt])
+  @@index([tenantId, userId, createdAt])
+  @@map("audit_log")
+}
+
+model Patient {
+  id                  String          @id @default(uuid())
+  tenantId            String
+  patientNumber       String          @db.VarChar(20)
+  firstName           String          @db.VarChar(100)
+  lastName            String          @db.VarChar(100)
+  dateOfBirth         DateTime?
+  gender              PatientGender?
+  phone               String          @db.VarChar(20)
+  email               String?         @db.VarChar(255)
+  address             Json?
+  emergencyContact    Json?
+  bloodGroup          String?         @db.VarChar(5)
+  allergies           String[]
+  medicalHistory      Json?
+  notes               String?         @db.Text
+  profilePhotoKey     String?         @db.VarChar(500)
+  createdBy           String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  deletedAt           DateTime?
+
+  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator             User            @relation("PatientCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  appointments        Appointment[]
+  visits              Visit[]
+  photos              Photo[]
+  prescriptions       Prescription[]
+  patientPackages     PatientPackage[]
+  invoices            Invoice[]
+
+  @@unique([tenantId, patientNumber])
+  @@index([tenantId])
+  @@index([tenantId, phone])
+  @@index([tenantId, lastName, firstName])
+  @@index([deletedAt])
+  @@map("patient")
+}
+
+model Appointment {
+  id                  String            @id @default(uuid())
+  tenantId            String
+  patientId           String
+  doctorId            String
+  appointmentDate     DateTime
+  startTime           DateTime
+  endTime             DateTime
+  procedureType       String?           @db.VarChar(100)
+  status              AppointmentStatus @default(BOOKED)
+  checkInTime         DateTime?
+  cancellationReason  String?           @db.Text
+  notes               String?           @db.Text
+  createdBy           String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  deletedAt           DateTime?
+
+  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient             Patient           @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctor              User              @relation("AppointmentDoctor", fields: [doctorId], references: [id], onDelete: Restrict)
+  creator             User              @relation("AppointmentCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  visit               Visit?
+
+  @@index([tenantId])
+  @@index([tenantId, doctorId, appointmentDate])
+  @@index([tenantId, patientId])
+  @@index([deletedAt])
+  @@map("appointment")
+}
+
+model Visit {
+  id                  String       @id @default(uuid())
+  tenantId            String
+  patientId           String
+  doctorId            String
+  appointmentId       String?   @unique
+  visitNumber         String       @db.VarChar(20)
+  status              VisitStatus  @default(IN_PROGRESS)
+  chiefComplaint      String?      @db.Text
+  clinicalNotes       String?      @db.Text
+  diagnosisCodes      Json?
+  vitals              Json?
+  signedAt            DateTime?
+  signedBy            String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+
+  tenant              Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient             Patient      @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctor              User         @relation("VisitDoctor", fields: [doctorId], references: [id], onDelete: Restrict)
+  appointment         Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  signer              User?        @relation("VisitSignedBy", fields: [signedBy], references: [id], onDelete: SetNull)
+  versions            VisitVersion[]
+  procedureNotes      ProcedureNote[]
+  photos              Photo[]
+  prescriptions       Prescription[]
+  packageSessions     PackageSession[]
+  invoices            Invoice[]
+
+  @@unique([tenantId, visitNumber])
+  @@index([tenantId])
+  @@index([tenantId, patientId, createdAt])
+  @@index([deletedAt])
+  @@map("visit")
+}
+
+model VisitVersion {
+  id              String   @id @default(uuid())
+  visitId         String
+  versionNumber   Int
+  snapshot        Json
+  changedBy       String
+  changeReason    String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  visit           Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@unique([visitId, versionNumber])
+  @@map("visit_version")
+}
+
+model ProcedureTemplate {
+  id              String            @id @default(uuid())
+  tenantId        String?
+  name            String            @db.VarChar(255)
+  category        ProcedureCategory
+  fieldsSchema    Json
+  defaultValues   Json?
+  instructions    String?           @db.Text
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant?           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  procedureNotes  ProcedureNote[]
+
+  @@index([tenantId])
+  @@index([deletedAt])
+  @@map("procedure_template")
+}
+
+model ProcedureNote {
+  id              String            @id @default(uuid())
+  tenantId        String
+  visitId         String
+  templateId      String?
+  procedureName   String            @db.VarChar(255)
+  bodyArea        String?           @db.VarChar(100)
+  settings        Json?
+  notes           String?           @db.Text
+  complications   String?           @db.Text
+  performedBy     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  visit           Visit             @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  template        ProcedureTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  performer       User              @relation("ProcedureNotePerformedBy", fields: [performedBy], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([tenantId, visitId])
+  @@index([deletedAt])
+  @@map("procedure_note")
+}
+
+model Photo {
+  id                String   @id @default(uuid())
+  tenantId          String
+  patientId         String
+  visitId           String?
+  storageKey        String   @db.VarChar(500)
+  thumbnailKey      String?  @db.VarChar(500)
+  originalFilename  String   @db.VarChar(255)
+  mimeType          String   @db.VarChar(50)
+  fileSizeBytes     BigInt
+  bodyRegion        String   @db.VarChar(50)
+  bodySubRegion     String?  @db.VarChar(50)
+  annotations       Json?
+  captureDate       DateTime @default(now())
+  uploadedBy        String
+  marketingConsent  Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  deletedAt         DateTime?
+
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient           Patient  @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  visit             Visit?   @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  uploader          User     @relation("PhotoUploadedBy", fields: [uploadedBy], references: [id], onDelete: Restrict)
+  accessLogs        PhotoAccessLog[]
+
+  @@index([tenantId])
+  @@index([tenantId, patientId, bodyRegion])
+  @@index([tenantId, visitId])
+  @@index([deletedAt])
+  @@map("photo")
+}
+
+model PhotoAccessLog {
+  id            BigInt   @id @default(autoincrement())
+  photoId       String
+  userId        String
+  accessType    String
+  ipAddress     String?  @db.Inet
+  createdAt     DateTime @default(now())
+
+  photo         Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([photoId])
+  @@index([userId])
+  @@map("photo_access_log")
+}
+
+model Prescription {
+  id              String   @id @default(uuid())
+  tenantId        String
+  visitId         String
+  patientId       String
+  doctorId        String
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  visit           Visit    @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctor          User     @relation("PrescriptionDoctor", fields: [doctorId], references: [id], onDelete: Restrict)
+  items           PrescriptionItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, visitId])
+  @@index([tenantId, patientId])
+  @@index([deletedAt])
+  @@map("prescription")
+}
+
+model PrescriptionItem {
+  id              String   @id @default(uuid())
+  prescriptionId  String
+  drugName        String   @db.VarChar(255)
+  dosage          String?  @db.VarChar(100)
+  frequency       String?  @db.VarChar(100)
+  duration        String?  @db.VarChar(100)
+  route           String?  @db.VarChar(50)
+  instructions    String?  @db.Text
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  prescription    Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([prescriptionId])
+  @@map("prescription_item")
+}
+
+model Regimen {
+  id              String   @id @default(uuid())
+  tenantId        String
+  name            String   @db.VarChar(255)
+  description     String?  @db.Text
+  items           Json
+  createdBy       String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator         User     @relation("RegimenCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([deletedAt])
+  @@map("regimen")
+}
+
+model ProcedureCatalog {
+  id              String   @id @default(uuid())
+  tenantId        String
+  name            String   @db.VarChar(255)
+  category        String   @db.VarChar(100)
+  description     String?  @db.Text
+  defaultPrice    Decimal  @db.Decimal(10, 2)
+  durationMinutes Int?
+  hsnSacCode      String?  @db.VarChar(10)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  packages        Package[]
+  invoiceItems    InvoiceItem[]
+
+  @@index([tenantId])
+  @@index([deletedAt])
+  @@map("procedure_catalog")
+}
+
+model Package {
+  id              String   @id @default(uuid())
+  tenantId        String
+  name            String   @db.VarChar(255)
+  procedureId     String
+  totalSessions   Int
+  price           Decimal  @db.Decimal(10, 2)
+  validityDays    Int
+  description     String?  @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  procedure       ProcedureCatalog @relation(fields: [procedureId], references: [id], onDelete: Restrict)
+  patientPackages PatientPackage[]
+
+  @@index([tenantId])
+  @@index([deletedAt])
+  @@map("package")
+}
+
+model PatientPackage {
+  id              String         @id @default(uuid())
+  tenantId        String
+  patientId       String
+  packageId       String
+  sessionsTotal   Int
+  sessionsUsed    Int            @default(0)
+  purchaseDate    DateTime
+  expiryDate      DateTime
+  status          PackageStatus  @default(ACTIVE)
+  createdBy       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient         Patient        @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  package         Package        @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  creator         User           @relation("PatientPackageCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  sessions        PackageSession[]
+  invoiceItems    InvoiceItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([deletedAt])
+  @@map("patient_package")
+}
+
+model PackageSession {
+  id                  String   @id @default(uuid())
+  patientPackageId    String
+  visitId             String
+  sessionNumber       Int
+  performedAt         DateTime @default(now())
+  notes               String?  @db.Text
+
+  patientPackage      PatientPackage @relation(fields: [patientPackageId], references: [id], onDelete: Cascade)
+  visit               Visit    @relation(fields: [visitId], references: [id], onDelete: Restrict)
+
+  @@unique([patientPackageId, sessionNumber])
+  @@index([patientPackageId])
+  @@map("package_session")
+}
+
+model Invoice {
+  id              String         @id @default(uuid())
+  tenantId        String
+  patientId       String
+  visitId         String?
+  invoiceNumber   String         @db.VarChar(30)
+  invoiceDate     DateTime       @default(now())
+  subtotal        Decimal        @db.Decimal(10, 2)
+  discountAmount  Decimal        @default(0) @db.Decimal(10, 2)
+  discountReason  String?        @db.Text
+  taxAmount       Decimal        @default(0) @db.Decimal(10, 2)
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  amountPaid      Decimal        @default(0) @db.Decimal(10, 2)
+  amountDue       Decimal        @db.Decimal(10, 2)
+  status          InvoiceStatus  @default(DRAFT)
+  notes           String?        @db.Text
+  createdBy       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient         Patient        @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  visit           Visit?         @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  creator         User           @relation("InvoiceCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  items           InvoiceItem[]
+  payments        Payment[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([tenantId, invoiceDate])
+  @@index([deletedAt])
+  @@map("invoice")
+}
+
+model InvoiceItem {
+  id                  String   @id @default(uuid())
+  invoiceId           String
+  description         String   @db.VarChar(255)
+  procedureId         String?
+  patientPackageId    String?
+  quantity            Int      @default(1)
+  unitPrice           Decimal  @db.Decimal(10, 2)
+  discount            Decimal  @default(0) @db.Decimal(10, 2)
+  taxRate             Decimal  @default(18.00) @db.Decimal(5, 2)
+  cgst                Decimal  @default(0) @db.Decimal(10, 2)
+  sgst                Decimal  @default(0) @db.Decimal(10, 2)
+  igst                Decimal  @default(0) @db.Decimal(10, 2)
+  total               Decimal  @db.Decimal(10, 2)
+  sortOrder           Int      @default(0)
+
+  invoice             Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  procedure           ProcedureCatalog? @relation(fields: [procedureId], references: [id], onDelete: SetNull)
+  patientPackage      PatientPackage? @relation(fields: [patientPackageId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@map("invoice_item")
+}
+
+model Payment {
+  id                  String      @id @default(uuid())
+  tenantId            String
+  invoiceId           String
+  amount              Decimal     @db.Decimal(10, 2)
+  paymentMode         PaymentMode
+  referenceNumber     String?     @db.VarChar(100)
+  paymentDate         DateTime    @default(now())
+  receivedBy          String
+  notes               String?     @db.Text
+  createdAt           DateTime    @default(now())
+
+  tenant              Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice             Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  receiver            User        @relation("PaymentReceivedBy", fields: [receivedBy], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([tenantId, invoiceId])
+  @@map("payment")
+}
