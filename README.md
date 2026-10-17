@@ -1,169 +1,149 @@
-# MedNexa — DERMA EMR
+# DERMA — Aesthetic Dermatology Clinical OS
 
-[![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
 [![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel&logoColor=white)](https://vercel.com)
+[![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=white)](https://render.com)
 
-A multi-tenant, cloud-based EMR built for aesthetic dermatology clinics. It covers the full
-patient journey — registration, appointments and queue, visits with procedure templates,
-clinical photos with before/after comparison, prescriptions, session packages, and
-GST-ready billing — with an immutable audit trail on every patient-data access.
+A multi-tenant, cloud-based Electronic Medical Record (EMR) system built specifically for aesthetic dermatology clinics. It covers the complete clinical journey: patient registration, real-time appointment queue, standardized visits with procedure templates, clinical photographic mapping with before/after comparisons, digital prescriptions, session packages, and GST-ready billing.
 
-Part of the MedNexa health ecosystem. Proprietary software; all rights reserved.
+---
 
-## Repository layout
+## 🏛 Architecture (Diagnox Pattern)
 
-| Path | Description |
-| --- | --- |
-| `derma/` | Self-contained DERMA EMR stack — run it on its own |
-| `derma/backend/` | NestJS REST API, WebSocket queue, Prisma schema and migrations |
-| `derma/frontend/` | Next.js 14 clinic application (App Router) |
-| `derma/docker-compose.yml` | Local development stack (Postgres, Redis, MinIO, app) |
-| `derma/docker-compose.prod.yml` | Production stack (includes Nginx) |
-| `derma/nginx/` | Reverse proxy configuration for production |
-| `mednexa/` | Static marketing and sales site for the MedNexa products |
-| `docs/` | Planning and engineering documentation |
-
-## Modules
-
-| ID | Module | Status |
-| --- | --- | --- |
-| M1 | Auth, RBAC, multi-tenancy, audit logging | Implemented |
-| M2 | Patient registration and search (duplicate detection) | Implemented |
-| M3 | Appointments and live queue (WebSocket) | Implemented |
-| M4 | Visits, procedure templates, clinical notes, ICD-10 | Implemented |
-| M5 | Clinical photo management and secure access | Implemented |
-| M6 | Prescriptions and reusable regimens | Implemented |
-| M7 | Procedure catalog and session packages | Implemented |
-| M8 | Billing, invoices, payments, GST | Implemented |
-| M9 | Reports and dashboards | Implemented |
-
-Planned after v1: body map with lesion tracking, severity scores (PASI, EASI, IGA, DLQI,
-SALT), digital consent forms, biopsy tracking, patient portal, and WhatsApp/SMS reminders.
-See `docs/implementation-plan.md` for the full scope.
-
-## Tech stack
-
-| Layer | Technology |
-| --- | --- |
-| Frontend | Next.js 14 (App Router), React 18, TanStack Query, Zustand, Tailwind CSS, Radix UI |
-| Backend | NestJS 10, Prisma 5, Passport JWT, Socket.IO, Swagger, Jest |
-| Database | PostgreSQL 15 |
-| Storage | MinIO / S3 (private buckets, signed short-lived URLs) |
-| Cache / queue | Redis 7 |
-| Infrastructure | Docker Compose, Nginx, Helmet, rate limiting |
-
-## Architecture
-
-```mermaid
-graph LR
-    UI["Next.js frontend<br/>(port 3000)"] --> API["NestJS API<br/>(port 3001, /api/v1)"]
-    API --> PG[("PostgreSQL 15")]
-    API --> RD[("Redis 7")]
-    API --> S3[("MinIO / S3<br/>photo storage")]
-    API -.->|WebSocket| UI
+```
+┌─────────────────────────────────┐           ┌─────────────────────────────────┐
+│   Vercel (Next.js 14 Frontend)  │           │    Render (NestJS 10 API)       │
+│   Root Directory: "frontend"    │ ───REST──▶│    Root Directory: "backend"    │
+│   Landing Page at "/"           │◀──WSS─────│    Port: 3001, Prefix: /api/v1  │
+│   Clinician Portal at "/login"  │           └────────────────┬────────────────┘
+└─────────────────────────────────┘                            │
+                                                               ▼
+                                              ┌─────────────────────────────────┐
+                                              │    Render PostgreSQL Database   │
+                                              │    Prisma Schema & Migrations   │
+                                              └─────────────────────────────────┘
 ```
 
-Request pipeline: CORS → rate limiter → tenant extraction → JWT auth → RBAC guard →
-validation → audit interceptor.
+---
 
-## Getting started
+## 📁 Repository Structure
+
+```
+Derma/
+├── frontend/               # Next.js 14 App Router (Tailwind CSS, TanStack Query, Radix UI)
+│   ├── src/app/            # Routes: / (Landing Page), /login (DEMO Login), /dashboard (EMR)
+│   └── package.json
+├── backend/                # NestJS 10 REST API, WebSocket Queue, Prisma ORM
+│   ├── prisma/             # Schema, migrations, seed data
+│   ├── src/                # Modules: auth, patients, appointments, visits, photos, billing
+│   └── package.json
+├── nginx/                  # Nginx reverse proxy configuration for Docker deployments
+├── docs/                   # Implementation plan & engineering playbooks
+├── docker-compose.yml      # Local development container stack
+├── docker-compose.prod.yml # Production multi-container stack
+└── README.md
+```
+
+---
+
+## 🚀 Cloud Deployment Guide
+
+### 1. Render Deployment (Backend API & Database)
+
+#### A. Create PostgreSQL Database on Render
+1. Go to [Render Dashboard](https://dashboard.render.com/) → **New +** → **PostgreSQL**.
+2. **Name**: `derma-postgres`
+3. **Database**: `derma_ai`
+4. Click **Create Database**, then copy the **Internal Database URL**.
+
+#### B. Create Web Service for Backend
+1. In Render Dashboard, click **New +** → **Web Service** → Connect `mhd-shereef/Derma`.
+2. Configure settings:
+   - **Name**: `derma-backend`
+   - **Root Directory**: `backend`
+   - **Runtime**: `Node`
+   - **Build Command**:
+     ```bash
+     npm install && npm run prisma:generate && npm run prisma:migrate:prod && npm run build
+     ```
+   - **Start Command**:
+     ```bash
+     npm run start:prod
+     ```
+3. Add Environment Variables:
+   - `NODE_ENV`: `production`
+   - `DATABASE_URL`: `[Paste Render Internal Database URL]`
+   - `JWT_SECRET`: `[Random 32+ character string]`
+   - `JWT_EXPIRES_IN`: `15m`
+   - `JWT_REFRESH_SECRET`: `[Random 32+ character string]`
+   - `JWT_REFRESH_EXPIRES_IN`: `7d`
+   - `FRONTEND_URL`: `https://[your-vercel-app].vercel.app` (for CORS allowlist)
+
+---
+
+### 2. Vercel Deployment (Frontend Application)
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard) → **Add New…** → **Project**.
+2. Import repository `mhd-shereef/Derma`.
+3. In **Configure Project**:
+   - **Framework Preset**: `Next.js`
+   - **Root Directory**: Click **Edit** and set to `frontend`
+4. Add Environment Variables:
+   - `NEXT_PUBLIC_API_URL`: `https://[your-render-backend].onrender.com/api/v1`
+   - `NEXT_PUBLIC_WS_URL`: `https://[your-render-backend].onrender.com`
+5. Click **Deploy**.
+
+---
+
+## 💻 Local Development
 
 ### Prerequisites
+- Node.js 20+
+- Docker & Docker Compose (optional for local Postgres/Redis/MinIO)
 
-- Docker and Docker Compose (recommended path), or
-- Node.js 20+, npm, and a local PostgreSQL 15 / Redis / MinIO for manual setup
-
-### Option 1 — Docker Compose
-
-All commands run inside `derma/`:
-
+### Option 1 — Run with Docker Compose
 ```bash
-cd derma
-cp .env.example .env                  # review values; defaults are dev-only
 docker compose up -d --build
 docker exec derma-ai-backend npx prisma migrate deploy
 docker exec derma-ai-backend npm run prisma:seed
 ```
+- Frontend: `http://localhost:3000`
+- API & Swagger: `http://localhost:3001/docs`
 
-| Service | URL |
-| --- | --- |
-| Clinic app | http://localhost:3000 |
-| API | http://localhost:3001/api/v1 |
-| API docs (Swagger) | http://localhost:3001/docs |
-| MinIO console | http://localhost:9001 |
-| PostgreSQL (host port) | `localhost:5433` |
-
-### Option 2 — Local development
+### Option 2 — Run Locally
 
 ```bash
-# 1. Start infrastructure only (from derma/)
-cd derma
-docker compose up -d postgres redis minio
-
-# 2. Backend
+# 1. Backend
 cd backend
-npm ci
-cp .env.example .env
-# When using the Dockerized Postgres, change the .env port to 5433:
-# DATABASE_URL=postgresql://derma_ai:derma_ai_dev@localhost:5433/derma_ai?schema=public
-npx prisma migrate deploy
+npm install
+npx prisma migrate dev
 npm run prisma:seed
 npm run start:dev
 
-# 3. Frontend (new terminal)
-cd derma/frontend
-npm ci
-cp .env.example .env
+# 2. Frontend (in new terminal)
+cd frontend
+npm install
 npm run dev
 ```
 
-### Demo accounts (after seeding)
+### 🔑 Demo Accounts
+All seeded accounts use password: `password123`
+- Owner: `owner@demo-clinic.com`
+- Doctor: `dr.arjun@demo-clinic.com`
+- Doctor: `dr.sneha@demo-clinic.com`
+- Admin: `admin@demo-clinic.com`
 
-Seeded tenant "Demo Clinic". All accounts use the password `password123`.
+---
 
-| Role | Email |
-| --- | --- |
-| Owner | `owner@demo-clinic.com` |
-| Admin | `admin@demo-clinic.com` |
-| Doctor | `dr.arjun@demo-clinic.com` |
-| Doctor | `dr.sneha@demo-clinic.com` |
+## 🔒 Security & Compliance
+- Multi-tenancy isolation enforced on every Prisma query.
+- Role-based Access Control (RBAC) on all API endpoints.
+- Immutable audit log for HIPAA-aligned clinical data access.
+- Clinical photography secured in private object storage with time-limited signed URLs.
 
-## Testing
-
-```bash
-cd derma/backend
-npm test               # Jest unit tests
-npm run test:cov       # coverage report
-
-cd derma/frontend
-npm run type-check     # TypeScript
-npm run lint           # ESLint
-```
-
-## Documentation
-
-| Document | Contents |
-| --- | --- |
-| `docs/implementation-plan.md` | Full 9-phase plan: scope, architecture, database schema, API design, testing |
-| `docs/engineering-playbook.md` | Delivery process, phases, and working rules |
-| `docs/mednexa-website-brief.md` | Brief behind the marketing site |
-| `mednexa/README.md` | How to run and customize the marketing site |
-
-## Security and compliance
-
-- Tenant isolation on every query; cross-tenant access is rejected.
-- RBAC guard on all endpoints, with JWT access tokens (15 min) and rotating refresh tokens.
-- Immutable audit log for every create/read/update/delete on patient data.
-- Soft deletes and versioning — clinical data is never hard-deleted.
-- Photos stored in private object storage, served via short-lived signed URLs, with access logging.
-- Helmet headers, rate limiting, CORS allowlist, and input validation (whitelist mode).
-- Secrets are read from environment variables; no credentials are committed.
-
-## License
-
-Proprietary. Copyright (c) MedNexa. All rights reserved. No part of this software may be
-copied, modified, or distributed without prior written permission.
+## 📄 License
+Proprietary. Copyright (c) MedNexa / DERMA. All rights reserved.

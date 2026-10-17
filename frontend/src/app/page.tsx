@@ -34,22 +34,20 @@ export default function LandingPage() {
       {/* 1. TOP FLOATING NAVIGATION BAR */}
       <header className="sticky top-4 z-50 px-4 sm:px-8 max-w-7xl mx-auto">
         <nav className="bg-white/90 backdrop-blur-md rounded-full px-6 py-3.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-black/[0.05] flex items-center justify-between transition-all">
-          {/* Brand & Ecosystem Link */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#FAF6EF] hover:bg-[#F0EBE1] border border-[#0C1A2E]/10 text-xs font-medium text-[#0C1A2E] transition-colors"
-              title="Return to MedNexa Home"
-            >
-              <span>← MedNexa</span>
-            </Link>
-            <Link href="/derma" className="flex items-center gap-2 group">
-              <div className="h-8 w-8 rounded-full bg-[#0D3A35] text-white flex items-center justify-center font-serif text-sm font-bold shadow-sm group-hover:scale-105 transition-transform">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="h-9 w-9 rounded-full bg-[#0D3A35] text-white flex items-center justify-center font-serif text-sm font-bold shadow-sm group-hover:scale-105 transition-transform">
                 D
               </div>
-              <span className="font-serif text-xl font-bold tracking-tight text-[#0D3A35]">
-                DERMA
-              </span>
+              <div className="flex flex-col">
+                <span className="font-serif text-xl font-bold tracking-tight text-[#0D3A35] leading-none">
+                  DERMA
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mt-0.5">
+                  Clinical OS
+                </span>
+              </div>
             </Link>
           </div>
 
