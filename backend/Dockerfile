@@ -22,8 +22,9 @@ COPY . .
 # Build application
 RUN npm run build
 
-# Ensure both dist/main.js and dist/src/main.js are available
-RUN cp dist/src/main.js dist/main.js || true
+# Ensure both dist/main.js and dist/src/main.js exist regardless of build rootDir
+RUN if [ -f dist/main.js ]; then mkdir -p dist/src && cp dist/main.js dist/src/main.js; fi
+RUN if [ -f dist/src/main.js ]; then cp dist/src/main.js dist/main.js; fi
 
 # Prune dev dependencies, keeping production deps (including prisma CLI)
 RUN npm prune --production
@@ -50,4 +51,4 @@ USER nestjs
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npx prisma migrate deploy && dumb-init node dist/src/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && dumb-init node dist/main.js"]
