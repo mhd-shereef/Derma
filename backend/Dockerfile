@@ -1,26 +1,53 @@
-# Development Dockerfile
-FROM node:20-alpine
+# Production Dockerfile
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies for native modules
+# Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++
 
-# Copy package files
+# Copy package manifests
 COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm ci
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
-# Copy source code
+# Copy application source
 COPY . .
 
-# Expose port
+# Build application
+RUN npm run build
+
+# Ensure both dist/main.js and dist/src/main.js are available
+RUN cp dist/src/main.js dist/main.js || true
+
+# Prune dev dependencies, keeping production deps (including prisma CLI)
+RUN npm prune --production
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Copy built application from builder
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+
+USER nestjs
+
 EXPOSE 3001
 
-# Start in development mode
-CMD ["npm", "run", "start:dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && dumb-init node dist/src/main.js"]

@@ -3,24 +3,27 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies for native modules
+# Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++
 
-# Copy package files
+# Copy package manifests
 COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm ci
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
-# Copy source code
+# Copy application source
 COPY . .
 
-# Build the application
+# Build application
 RUN npm run build
+
+# Ensure both dist/main.js and dist/src/main.js are available
+RUN cp dist/src/main.js dist/main.js || true
 
 # Prune dev dependencies, keeping production deps (including prisma CLI)
 RUN npm prune --production
@@ -47,4 +50,4 @@ USER nestjs
 
 EXPOSE 3001
 
-CMD ["sh", "-c", "npx prisma migrate deploy && dumb-init node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && dumb-init node dist/src/main.js"]
