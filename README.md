@@ -18,13 +18,14 @@ Part of the MedNexa health ecosystem. Proprietary software; all rights reserved.
 
 | Path | Description |
 | --- | --- |
-| `backend/` | NestJS REST API, WebSocket queue, Prisma schema and migrations |
-| `frontend/` | Next.js 14 clinic application (App Router) |
+| `derma/` | Self-contained DERMA EMR stack — run it on its own |
+| `derma/backend/` | NestJS REST API, WebSocket queue, Prisma schema and migrations |
+| `derma/frontend/` | Next.js 14 clinic application (App Router) |
+| `derma/docker-compose.yml` | Local development stack (Postgres, Redis, MinIO, app) |
+| `derma/docker-compose.prod.yml` | Production stack (includes Nginx) |
+| `derma/nginx/` | Reverse proxy configuration for production |
 | `mednexa/` | Static marketing and sales site for the MedNexa products |
-| `nginx/` | Reverse proxy configuration for production |
 | `docs/` | Planning and engineering documentation |
-| `docker-compose.yml` | Local development stack (Postgres, Redis, MinIO, app) |
-| `docker-compose.prod.yml` | Production stack (includes Nginx) |
 
 ## Modules
 
@@ -78,7 +79,10 @@ validation → audit interceptor.
 
 ### Option 1 — Docker Compose
 
+All commands run inside `derma/`:
+
 ```bash
+cd derma
 cp .env.example .env                  # review values; defaults are dev-only
 docker compose up -d --build
 docker exec derma-ai-backend npx prisma migrate deploy
@@ -96,7 +100,8 @@ docker exec derma-ai-backend npm run prisma:seed
 ### Option 2 — Local development
 
 ```bash
-# 1. Start infrastructure only
+# 1. Start infrastructure only (from derma/)
+cd derma
 docker compose up -d postgres redis minio
 
 # 2. Backend
@@ -110,7 +115,7 @@ npm run prisma:seed
 npm run start:dev
 
 # 3. Frontend (new terminal)
-cd frontend
+cd derma/frontend
 npm ci
 cp .env.example .env
 npm run dev
@@ -130,11 +135,11 @@ Seeded tenant "Demo Clinic". All accounts use the password `password123`.
 ## Testing
 
 ```bash
-cd backend
+cd derma/backend
 npm test               # Jest unit tests
 npm run test:cov       # coverage report
 
-cd frontend
+cd derma/frontend
 npm run type-check     # TypeScript
 npm run lint           # ESLint
 ```
