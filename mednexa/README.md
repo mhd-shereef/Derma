@@ -1,6 +1,6 @@
 # MedNexa — marketing & sales site (standalone, no framework)
 
-Fresh build in `mednexa/`. Nothing reused from the existing codebase.
+Static site for the MedNexa products (Diagnox and Derma), dependency-free.
 Open `index.html` directly, or serve the folder: `python -m http.server` → http://localhost:8000
 
 ## Pages
