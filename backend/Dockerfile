@@ -3,8 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies for native modules
-RUN apk add --no-cache python3 make g++
+# Install build dependencies for native modules and Prisma OpenSSL
+RUN apk add --no-cache python3 make g++ openssl
 
 # Copy package manifests
 COPY package*.json ./
@@ -33,8 +33,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install OpenSSL (required by Prisma engine) and dumb-init
+RUN apk add --no-cache openssl dumb-init
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
