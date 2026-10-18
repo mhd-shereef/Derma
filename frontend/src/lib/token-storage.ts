@@ -63,7 +63,13 @@ export async function refreshAccessToken(): Promise<string> {
     throw new Error('No refresh token available');
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+  let apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+  if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+    if (!process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
+      apiUrl = 'https://derma-xmpq.onrender.com/api/v1';
+    }
+  }
+
 
   // Use plain axios instance to avoid circular dependency and interceptor loops
   const response = await axios.post<{ data: { accessToken: string; refreshToken: string } } | { accessToken: string; refreshToken: string }>(

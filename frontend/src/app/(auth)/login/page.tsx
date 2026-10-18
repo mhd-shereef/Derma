@@ -57,8 +57,9 @@ export default function LoginPage() {
       toast.success(`Welcome, Dr. ${user.lastName || user.firstName || 'Demo'}!`);
       router.push('/dashboard');
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { error?: { message?: string } } } };
-      const message = axiosError.response?.data?.error?.message ?? 'Invalid credentials';
+      const axiosError = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
+      const message = axiosError.response?.data?.error?.message ?? (axiosError.message && axiosError.message !== 'Error' ? axiosError.message : 'Unable to connect to authentication server');
+
 
       if (message.toLowerCase().includes('mfa')) {
         setShowMfa(true);

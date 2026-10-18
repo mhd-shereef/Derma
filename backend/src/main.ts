@@ -33,8 +33,9 @@ async function bootstrap() {
   app.use(compression());
 
   const corsOrigins = frontendUrl.includes(',')
-    ? frontendUrl.split(',').map((url) => url.trim()).filter(Boolean)
-    : frontendUrl;
+    ? frontendUrl.split(',').map((url) => url.trim().replace(/\/+$/, '')).filter(Boolean)
+    : frontendUrl.trim().replace(/\/+$/, '');
+
 
   app.enableCors({
     origin: corsOrigins,

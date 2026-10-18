@@ -1,7 +1,17 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, getRefreshToken, setTokens, clearTokens, refreshAccessToken } from './token-storage';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+const getBaseApiUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+    if (!envUrl || envUrl.includes('localhost')) {
+      return 'https://derma-xmpq.onrender.com/api/v1';
+    }
+  }
+  return envUrl || 'http://localhost:3001/api/v1';
+};
+
+const API_URL = getBaseApiUrl();
 
 class ApiClient {
   private client: AxiosInstance;
@@ -28,6 +38,12 @@ class ApiClient {
   }
 
   private requestInterceptor(config: InternalAxiosRequestConfig) {
+    if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+      if (!config.baseURL || config.baseURL.includes('localhost')) {
+        config.baseURL = 'https://derma-xmpq.onrender.com/api/v1';
+      }
+    }
+
     const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
