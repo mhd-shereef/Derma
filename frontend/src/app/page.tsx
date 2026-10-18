@@ -156,7 +156,7 @@ export default function LandingPage() {
         </div>
 
         {/* 3. HERO VISUAL / INTERACTIVE PRACTICE DASHBOARD PREVIEW (Diagnox Style) */}
-        <div id="overview" className="mt-14 max-w-6xl mx-auto">
+        <div id="overview" className="mt-14 max-w-6xl mx-auto scroll-mt-28">
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-[0_12px_40px_rgb(0,0,0,0.06)] border border-black/[0.04] space-y-8">
             {/* Dashboard Header Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
@@ -333,7 +333,7 @@ export default function LandingPage() {
       </section>
 
       {/* 4. CORE CLINICAL CAPABILITIES / POINTS */}
-      <section id="capabilities" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto">
+      <section id="capabilities" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-28">
         <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-[#0D3A35] tracking-wider uppercase">
             <span>Specialized Capabilities</span>
@@ -476,7 +476,7 @@ export default function LandingPage() {
       </section>
 
       {/* 5. VISUAL CLINICAL WORKFLOW / PRACTICE FLOW */}
-      <section id="workflow" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto">
+      <section id="workflow" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-28">
         <div className="bg-white rounded-3xl p-8 sm:p-14 border border-black/[0.04] shadow-sm">
           <div className="max-w-3xl space-y-3 mb-12">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F5F2EB] text-xs font-semibold text-[#0D3A35] tracking-wider uppercase">
@@ -547,7 +547,7 @@ export default function LandingPage() {
       </section>
 
       {/* 6. CLINICAL PHOTOGRAPHY SHOWCASE (Featuring our high-res clinic image) */}
-      <section id="imaging" className="py-12 px-4 sm:px-8 max-w-7xl mx-auto">
+      <section id="imaging" className="py-12 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-28">
         <div className="bg-[#FAF8F5] rounded-3xl p-8 sm:p-12 border border-slate-200/80 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-[#0D3A35] tracking-wider uppercase">
@@ -636,44 +636,211 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. CLINICAL SPECIALTIES SUPPORTED */}
-      <section id="specialties" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-[#0D3A35] tracking-wider uppercase">
-            <span>Clinical Disciplines</span>
+      {/* 7. CLINICAL SPECIALTIES & REAL PROCEDURAL SHOWCASE */}
+      <section id="specialties" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto scroll-mt-28">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-[#0D3A35] tracking-wider uppercase shadow-sm">
+            <span>Specialized Clinical Procedures</span>
           </div>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#0D3A35]">
-            Tailored to Your Dermatology Practice Discipline
+          <h2 className="font-serif text-3xl sm:text-5xl font-bold text-[#0D3A35] tracking-tight">
+            Tailored to Real Dermatology Procedures
           </h2>
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            From medical diagnostic examinations to precision aesthetic resurfacing, DERMA captures every phase of clinical touchpoints with standardized photo records.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-            <h4 className="font-serif text-lg font-bold text-slate-900">Medical Dermatology</h4>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Acne, psoriasis, eczema, rosacea, and longitudinal treatment response tracking.
-            </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Specialty 1: Facial Cleansing & Skin Prep */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+            <div>
+              <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                <Image
+                  src="/facial-cleansing.jpg"
+                  alt="Clinical Facial Cleansing and Skin Prep"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 rounded-full bg-[#0D3A35]/90 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10">
+                    Medical Prep
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-300">
+                    Procedure 01
+                  </span>
+                  <h3 className="font-serif text-lg font-bold leading-tight">
+                    Clinical Facial Cleansing
+                  </h3>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Aseptic skin barrier preparation and botanical micro-foam cleansing. Prepares follicles for chemical peel application, medical extractions, and topical regimens.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Barrier Balance
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Aseptic Prep
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Follicle Care
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#0D3A35] font-semibold">
+              <span>Medical Dermatology</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-            <h4 className="font-serif text-lg font-bold text-slate-900">Aesthetic Medicine</h4>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Neuromodulators, dermal fillers, biostimulators, skin boosters, and chemical peels.
-            </p>
+          {/* Specialty 2: Facial Massage & Lymphatic Drainage */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+            <div>
+              <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                <Image
+                  src="/facial-massage.jpg"
+                  alt="Aesthetic Facial Massage and Lymphatic Drainage"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 rounded-full bg-[#1E6091]/90 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10">
+                    Aesthetic Rejuvenation
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-sky-300">
+                    Procedure 02
+                  </span>
+                  <h3 className="font-serif text-lg font-bold leading-tight">
+                    Facial Sculpting & Massage
+                  </h3>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Post-procedure manual lymphatic drainage and sculpting. Accelerates clearance of post-filler swelling, stimulates microcirculation, and delivers deep peptide nourishment.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Lymph Drainage
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Edema Relief
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Peptide Infusion
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#1E6091] font-semibold">
+              <span>Aesthetic Medicine</span>
+              <CheckCircle2 className="w-4 h-4 text-sky-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-            <h4 className="font-serif text-lg font-bold text-slate-900">Dermatologic Surgery</h4>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Excision margins, punch biopsies, Mohs stage tracking, and wound healing notes.
-            </p>
+          {/* Specialty 3: Skin Analysis & Face Diagnostic Testing */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+            <div>
+              <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                <Image
+                  src="/face-testing.jpg"
+                  alt="High-Precision Face Skin Testing and Dermoscopy Examination"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 rounded-full bg-[#B54708]/90 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10">
+                    Diagnostic Testing
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300">
+                    Procedure 03
+                  </span>
+                  <h3 className="font-serif text-lg font-bold leading-tight">
+                    Optical Face Testing
+                  </h3>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Polarized handheld optical dermoscopy for dermal pigment depth, pore texture assessment, and early dysplastic margin detection with standardized photographic logging.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Dermoscopy
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Pigment Depth
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Lesion Index
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#B54708] font-semibold">
+              <span>Diagnostic Dermatology</span>
+              <CheckCircle2 className="w-4 h-4 text-amber-600" />
+            </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
-            <h4 className="font-serif text-lg font-bold text-slate-900">Laser & Energy Devices</h4>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Fluence settings, spot sizes, wavelength records, and skin reaction observations.
-            </p>
+          {/* Specialty 4: Laser Rejuvenation & Resurfacing */}
+          <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between">
+            <div>
+              <div className="relative h-56 w-full overflow-hidden bg-slate-100">
+                <Image
+                  src="/laser-rejuvenation.jpg"
+                  alt="Laser Skin Rejuvenation and Collagen Remodeling"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 rounded-full bg-[#5925DC]/90 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10">
+                    Laser & Energy
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-purple-300">
+                    Procedure 04
+                  </span>
+                  <h3 className="font-serif text-lg font-bold leading-tight">
+                    Laser Rejuvenation
+                  </h3>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Fractional laser resurfacing and collagen stimulation. Records pulse fluence, spot sizes, pass counts, and pre/post skin temperature parameters for clinical follow-up.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Collagen Remodeling
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Fluence Log
+                  </span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    Wavelength
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-[#5925DC] font-semibold">
+              <span>Energy-Based Therapy</span>
+              <CheckCircle2 className="w-4 h-4 text-purple-600" />
+            </div>
           </div>
         </div>
       </section>
