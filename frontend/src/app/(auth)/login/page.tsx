@@ -64,7 +64,12 @@ export default function LoginPage() {
       setTokens({ accessToken, refreshToken }, user);
       setUser(user);
       toast.success(`Welcome, Dr. ${user.lastName || user.firstName || 'Demo'}!`);
-      router.push('/dashboard');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard';
+      } else {
+        router.push('/dashboard');
+      }
+
 
     } catch (error: unknown) {
       const axiosError = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
