@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
 
 export const metadata: Metadata = {
-  title: 'DERMA — Clinical Dermatology & Practice Management',
-  description: 'Purpose-built clinical platform for medical and aesthetic dermatology practices. Comprehensive photo documentation, anatomical charting, and patient care workflows.',
+  title: 'DERMA — Dermatology EMR & Clinical Operating System',
+  description: 'The purpose-built EMR for medical, surgical, and aesthetic dermatology: structured clinical charting, dermoscopic photo surveillance, anatomical vector mapping, laser parameter registries, and biopsy chain-of-custody tracking.',
 };
 
 export default function RootLayout({
