@@ -28,9 +28,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       } else {
         try {
           const response = await api.get<{ user: { id: string; email: string; firstName: string; lastName: string; role: string; tenantId: string } }>('/auth/me');
-          const userData = response.data.user;
-          setUser(userData);
+          const payload: any = response.data;
+          const userData = payload?.data?.user ?? payload?.user;
+          if (userData) {
+            setUser(userData);
+          }
           setLoading(false);
+
         } catch {
           router.push('/login');
         }

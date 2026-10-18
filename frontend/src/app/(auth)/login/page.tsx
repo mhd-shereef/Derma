@@ -51,11 +51,21 @@ export default function LoginPage() {
         mfaCode: formData.mfaCode || undefined,
       });
 
-      const { user, accessToken, refreshToken } = response.data;
+      const payload: any = response.data;
+      const authData = payload?.data ?? payload;
+      const user = authData?.user;
+      const accessToken = authData?.accessToken;
+      const refreshToken = authData?.refreshToken;
+
+      if (!user) {
+        throw new Error('Authentication response is missing user details');
+      }
+
       setTokens({ accessToken, refreshToken }, user);
       setUser(user);
       toast.success(`Welcome, Dr. ${user.lastName || user.firstName || 'Demo'}!`);
       router.push('/dashboard');
+
     } catch (error: unknown) {
       const axiosError = error as { message?: string; response?: { data?: { error?: { message?: string } } } };
       const message = axiosError.response?.data?.error?.message ?? (axiosError.message && axiosError.message !== 'Error' ? axiosError.message : 'Unable to connect to authentication server');
