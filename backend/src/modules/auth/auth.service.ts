@@ -88,7 +88,7 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.generateTokens(user);
 
-    await this.storeRefreshToken(user.id, refreshToken);
+    await this.storeRefreshToken(user.id, user.tenantId, refreshToken);
 
     return {
       user: this.sanitizeUser(user),
@@ -142,7 +142,7 @@ export class AuthService {
     });
 
     const { accessToken, refreshToken } = await this.generateTokens(user);
-    await this.storeRefreshToken(user.id, refreshToken);
+    await this.storeRefreshToken(user.id, user.tenantId, refreshToken);
 
     return {
       user: this.sanitizeUser(user),
@@ -182,7 +182,7 @@ export class AuthService {
     });
 
     const { accessToken, refreshToken: newRefreshToken } = await this.generateTokens(storedToken.user);
-    await this.storeRefreshToken(storedToken.user.id, newRefreshToken);
+    await this.storeRefreshToken(storedToken.user.id, storedToken.user.tenantId, newRefreshToken);
 
     return {
       accessToken,
@@ -327,13 +327,14 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private async storeRefreshToken(userId: string, refreshToken: string) {
+  private async storeRefreshToken(userId: string, tenantId: string, refreshToken: string) {
     const tokenHash = await this.hashToken(refreshToken);
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
     await this.prisma.refreshToken.create({
       data: {
         userId,
+        tenantId,
         tokenHash,
         expiresAt,
         deviceInfo: {},

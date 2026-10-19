@@ -119,6 +119,7 @@ model Tenant {
   payments              Payment[]
   regimens              Regimen[]
   auditLogs             AuditLog[]
+  refreshTokens         RefreshToken[]
 
   @@index([deletedAt])
   @@map("tenant")
@@ -171,6 +172,7 @@ model User {
 model RefreshToken {
   id            String   @id @default(uuid())
   userId        String
+  tenantId      String
   tokenHash     String   @db.VarChar(255)
   deviceInfo    Json?
   expiresAt     DateTime
@@ -178,8 +180,10 @@ model RefreshToken {
   createdAt     DateTime @default(now())
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([tenantId])
   @@index([expiresAt])
   @@map("refresh_token")
 }
