@@ -5,6 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": ["**/*.json", "**/*.sql"],
-    "watchAssets": true
+    "watchAssets": true,
+    "outDir": "./dist"
   }
 }
